@@ -33,8 +33,6 @@ class RefineDetDetectorWrapper(ObjectDetector):
         self.transformer = caffe.io.Transformer({'data': self.net.blobs['data'].data.shape})
         self.transformer.set_transpose('data', (2, 0, 1))
         self.transformer.set_mean('data', np.array([104, 117, 123]))  # mean pixel
-        # the reference model has channels in BGR order instead of RGB
-        self.transformer.set_channel_swap('data', (2, 1, 0))
 
     def predict(self, image_array):
         transformed_image = self.transformer.preprocess('data', image_array)
