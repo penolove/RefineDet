@@ -6,39 +6,33 @@ import numpy as np
 import caffe
 from caffe.proto import caffe_pb2
 from eyewitness.detection_utils import DetectionResult
-from eyewitness.image_id import ImageId
 from eyewitness.object_detector import ObjectDetector
-from eyewitness.image_utils import ImageHandler
+from eyewitness.image_utils import (ImageHandler, swap_channel_rgb_bgr)
 from google.protobuf import text_format
 from PIL import Image
 
 
 class RefineDetDetectorWrapper(ObjectDetector):
-    def __init__(self, threshold=0.6):
+    def __init__(self, params, threshold=0.6):
         self.threshold = threshold
 
         self.labelmap = caffe_pb2.LabelMap()
-        labelmap_file = 'data/VOC0712/labelmap_voc.prototxt'
+        labelmap_file = params['labelmap_file']
         with open(labelmap_file, 'r') as f:
             text_format.Merge(str(f.read()), self.labelmap)
 
         # load model
-        model_def = 'models/VGGNet/VOC0712/refinedet_vgg16_320x320/deploy.prototxt'
-        model_weights = ('models/VGGNet/VOC0712/refinedet_vgg16_320x320/'
-                         'VOC0712_refinedet_vgg16_320x320_final.caffemodel')
+        model_path = params['model_path']
+        model_name = params['model_name']
+        img_resize = params['image_size']
+        model_def = os.path.join(model_path, 'deploy.prototxt')
+        model_weights = os.path.join(model_path, model_name)
         self.net = caffe.Net(model_def, model_weights, caffe.TEST)
-
-        if '320' in model_def:
-            img_resize = 320
-        else:
-            img_resize = 512
 
         self.net.blobs['data'].reshape(1, 3, img_resize, img_resize)
         self.transformer = caffe.io.Transformer({'data': self.net.blobs['data'].data.shape})
         self.transformer.set_transpose('data', (2, 0, 1))
         self.transformer.set_mean('data', np.array([104, 117, 123]))  # mean pixel
-        # the reference model operates on images in [0,255] range instead of [0,1]
-        self.transformer.set_raw_scale('data', 255)
         # the reference model has channels in BGR order instead of RGB
         self.transformer.set_channel_swap('data', (2, 1, 0))
 
@@ -86,7 +80,8 @@ class RefineDetDetectorWrapper(ObjectDetector):
         -------
         DetectionResult
         """
-        results = self.predict(np.array(image))
+        image = swap_channel_rgb_bgr(np.array(image))
+        results = self.predict()
 
         detected_objects = []
         for i in range(0, results.shape[0]):
@@ -129,7 +124,14 @@ if __name__ == '__main__':
         caffe.set_device(args.gpu_id)
         caffe.set_mode_gpu()
 
-    object_detector = RefineDetDetectorWrapper()
+    params = {
+        'labelmap_file': 'data/VOC0712/labelmap_voc.prototxt',
+        'model_path': 'models/VGGNet/VOC0712/refinedet_vgg16_320x320/',
+        'model_name': 'VOC0712_refinedet_vgg16_320x320_final.caffemodel',
+        'image_size': 320,
+    }
+
+    object_detector = RefineDetDetectorWrapper(threshold=0.6)
 
     image = Image.open('examples/images/5566.jpg')
     detection_result = object_detector.detect(image, './5566.jpg')
