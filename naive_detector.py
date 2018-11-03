@@ -131,7 +131,7 @@ if __name__ == '__main__':
         'image_size': 320,
     }
 
-    object_detector = RefineDetDetectorWrapper(threshold=0.6)
+    object_detector = RefineDetDetectorWrapper(params, threshold=0.6)
 
     image = Image.open('examples/images/5566.jpg')
     detection_result = object_detector.detect(image, './5566.jpg')
