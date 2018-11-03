@@ -80,8 +80,8 @@ class RefineDetDetectorWrapper(ObjectDetector):
         -------
         DetectionResult
         """
-        image = swap_channel_rgb_bgr(np.array(image))
-        results = self.predict()
+        image_array = swap_channel_rgb_bgr(np.array(image))
+        results = self.predict(image_array)
 
         detected_objects = []
         for i in range(0, results.shape[0]):
