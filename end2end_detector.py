@@ -26,6 +26,9 @@ parser.add_argument(
     '--db_path', type=str, default='::memory::',
     help='the path used to store detection result records'
 )
+parser.add_argument(
+    '--interval_s', type=int, default=3, help='the interval of image generation'
+)
 
 
 class InMemoryImageProducer(ImageProducer):
