@@ -4,8 +4,10 @@ import sys
 import numpy as np
 
 import caffe
+import arrow
 from caffe.proto import caffe_pb2
 from eyewitness.detection_utils import DetectionResult
+from eyewitness.image_id import ImageId
 from eyewitness.object_detector import ObjectDetector
 from eyewitness.image_utils import (ImageHandler, swap_channel_rgb_bgr)
 from google.protobuf import text_format
@@ -132,6 +134,7 @@ if __name__ == '__main__':
     object_detector = RefineDetDetectorWrapper(params, threshold=0.6)
 
     image = Image.open('examples/images/5566.jpg')
-    detection_result = object_detector.detect(image, './5566.jpg')
+    image_id = ImageId(channel='demo', timestamp=arrow.now().timestamp, file_format='jpg')
+    detection_result = object_detector.detect(image, image_id)
     ImageHandler.draw_bbox(image, detection_result.detected_objects)
-    ImageHandler.save(image, detection_result.image_id)
+    ImageHandler.save(image, "detected_image/drawn_image.jpg")
