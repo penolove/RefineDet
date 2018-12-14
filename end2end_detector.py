@@ -22,6 +22,10 @@ Command line options
 '''
 parser.add_argument('--gpu_id', type=int, default=0)
 parser.add_argument('--save_fig', action='store_true')
+parser.add_argument(
+    '--db_path', type=str, default='::memory::',
+    help='the path used to store detection result records'
+)
 
 
 class InMemoryImageProducer(ImageProducer):
