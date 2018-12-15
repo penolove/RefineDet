@@ -72,19 +72,16 @@ if __name__ == '__main__':
     # image producer from webcam
     image_producer = InMemoryImageProducer(0, interval_s=args.interval_s)
 
-    # gpu preparation
+    # initialize object_detector
     if args.gpu_id >= 0:
         caffe.set_device(args.gpu_id)
         caffe.set_mode_gpu()
-
     params = {
         'labelmap_file': 'data/VOC0712/labelmap_voc.prototxt',
         'model_path': 'models/VGGNet/VOC0712/refinedet_vgg16_320x320/',
         'model_name': 'VOC0712_refinedet_vgg16_320x320_final.caffemodel',
         'image_size': 320,
     }
-
-    # object detector
     object_detector = RefineDetDetectorWrapper(params, threshold=0.6)
 
     # detection result handlers
