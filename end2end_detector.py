@@ -93,7 +93,7 @@ if __name__ == '__main__':
     result_handlers.append(bbox_sqlite_handler)
 
     # setup your line channel token and audience
-    channel_access_token = os.environ.get('CHANNEL_ACCESS_TOKEN')
+    channel_access_token = os.environ.get('LINE_CHANNEL_ACCESS_TOKEN')
     if channel_access_token:
         line_annotation_sender = LineAnnotationSender(
             channel_access_token=channel_access_token,
