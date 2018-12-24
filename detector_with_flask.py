@@ -1,17 +1,13 @@
 import argparse
 import os
 
-import cv2
-import time
 import caffe
-from eyewitness.config import (IN_MEMORY, BBOX)
-from eyewitness.image_utils import (ImageProducer, swap_channel_rgb_bgr)
-from eyewitness.flask_server import ObjectDetectionFlaskWrapper
+from eyewitness.config import BBOX
+from eyewitness.flask_server import BboxObjectDetectionFlaskWrapper
 from eyewitness.result_handler.db_writer import BboxPeeweeDbWriter
 from eyewitness.result_handler.line_detection_result_handler import LineAnnotationSender
 from naive_detector import RefineDetDetectorWrapper
 from peewee import SqliteDatabase
-from PIL import Image
 
 
 # class YOLO defines the default value, so suppress any default here
@@ -34,26 +30,10 @@ parser.add_argument(
 parser.add_argument(
     '--detector_port', type=int, default=5566, help='the port of detector port'
 )
-
-
-class InMemoryImageProducer(ImageProducer):
-    def __init__(self, video_path, interval_s):
-        self.vid = cv2.VideoCapture(video_path)
-        self.interval_s = interval_s
-        if not self.vid.isOpened():
-            raise IOError("Couldn't open webcam or video")
-
-    def produce_method(self):
-        return IN_MEMORY
-
-    def produce_image(self):
-        while True:
-            # clean buffer hack: for Linux V4L capture backend with a internal fifo
-            for iter_ in range(5):
-                self.vid.grab()
-            _, frame = self.vid.read()
-            yield Image.fromarray(swap_channel_rgb_bgr(frame))
-            time.sleep(self.interval_s)
+parser.add_argument(
+    '--drawn_image_dir', type=str, default=None,
+    help='the path used to store drawn images'
+)
 
 
 def image_url_handler(drawn_image_path):
@@ -65,11 +45,12 @@ def image_url_handler(drawn_image_path):
         return '%s/%s' % (site_domain, drawn_image_path)
 
 
-def line_detection_result_filter(detection_result):
+def line_detection_result_filter(detection_result, threshold=0.6):
     """
     used to check if sent notification or not
     """
-    return any(i.label == 'person' for i in detection_result.detected_objects)
+    return any(i.label == 'person' and i.score > threshold
+               for i in detection_result.detected_objects)
 
 
 if __name__ == '__main__':
@@ -108,9 +89,9 @@ if __name__ == '__main__':
             database=database)
         result_handlers.append(line_annotation_sender)
 
-    flask_wrapper = ObjectDetectionFlaskWrapper(
+    flask_wrapper = BboxObjectDetectionFlaskWrapper(
         object_detector, bbox_sqlite_handler, result_handlers,
-        database=database, with_admin=True)
+        database=database, drawn_image_dir=args.drawn_image_dir)
 
     params = {'host': args.detector_host, 'port': args.detector_port, }
     flask_wrapper.app.run(**params)
