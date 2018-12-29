@@ -93,5 +93,5 @@ if __name__ == '__main__':
         object_detector, bbox_sqlite_handler, result_handlers,
         database=database, drawn_image_dir=args.drawn_image_dir)
 
-    params = {'host': args.detector_host, 'port': args.detector_port, }
+    params = {'host': args.detector_host, 'port': args.detector_port, 'threaded': False}
     flask_wrapper.app.run(**params)
