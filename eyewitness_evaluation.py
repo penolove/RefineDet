@@ -1,4 +1,5 @@
 import argparse
+import logging
 
 import caffe
 from eyewitness.dataset_util import BboxDataSet
@@ -11,6 +12,7 @@ parser = argparse.ArgumentParser(argument_default=argparse.SUPPRESS)
 parser.add_argument('--gpu_id', type=int, default=0)
 
 if __name__ == '__main__':
+    logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
     args = parser.parse_args()
 
     # initialize object_detector
