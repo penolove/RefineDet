@@ -132,7 +132,7 @@ if __name__ == '__main__':
     }
 
     object_detector = RefineDetDetectorWrapper(params, threshold=0.6)
-
+    raw_image_path = 'examples/images/5566.jpg'
     image_id = ImageId(channel='demo', timestamp=arrow.now().timestamp, file_format='jpg')
     image_obj = Image(image_id, raw_image_path=raw_image_path)
     detection_result = object_detector.detect(image_obj)
