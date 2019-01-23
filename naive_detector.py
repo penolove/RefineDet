@@ -10,6 +10,7 @@ from eyewitness.detection_utils import DetectionResult
 from eyewitness.image_id import ImageId
 from eyewitness.object_detector import ObjectDetector
 from eyewitness.image_utils import (ImageHandler, swap_channel_rgb_bgr, Image)
+from eyewitness.config import BoundedBoxObject
 from google.protobuf import text_format
 
 
@@ -98,7 +99,7 @@ class RefineDetDetectorWrapper(ObjectDetector):
             x2 = int(round(results[i, 2]))
             y2 = int(round(results[i, 3]))
 
-            detected_objects.append([x1, y1, x2, y2, label, score, ''])
+            detected_objects.append(BoundedBoxObject(*[x1, y1, x2, y2, label, score, '']))
 
         image_dict = {
             'image_id': image_obj.image_id,
