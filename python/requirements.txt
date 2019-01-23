@@ -17,5 +17,5 @@ Pillow>=2.3.0
 six>=1.1.0
 
 # eyewitness
-eyewitness==0.47
+eyewitness==0.71
 opencv-python

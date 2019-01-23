@@ -16,7 +16,6 @@ parser = argparse.ArgumentParser(argument_default=argparse.SUPPRESS)
 Command line options
 '''
 parser.add_argument('--gpu_id', type=int, default=0)
-parser.add_argument('--save_fig', action='store_true')
 parser.add_argument(
     '--db_path', type=str, default='::memory::',
     help='the path used to store detection result records'
@@ -55,6 +54,7 @@ def line_detection_result_filter(detection_result, threshold=0.6):
 
 if __name__ == '__main__':
     args = parser.parse_args()
+    detection_threshold = 0.7
 
     # initialize object_detector
     if args.gpu_id >= 0:
@@ -67,7 +67,7 @@ if __name__ == '__main__':
         'model_name': 'VOC0712_refinedet_vgg16_320x320_final.caffemodel',
         'image_size': 320,
     }
-    object_detector = RefineDetDetectorWrapper(params, threshold=0.6)
+    object_detector = RefineDetDetectorWrapper(params, threshold=detection_threshold)
 
     # detection result handlers
     result_handlers = []
@@ -91,7 +91,8 @@ if __name__ == '__main__':
 
     flask_wrapper = BboxObjectDetectionFlaskWrapper(
         object_detector, bbox_sqlite_handler, result_handlers,
-        database=database, drawn_image_dir=args.drawn_image_dir)
+        database=database, drawn_image_dir=args.drawn_image_dir,
+        detection_threshold=detection_threshold, collect_feedback_period=172800)
 
     params = {'host': args.detector_host, 'port': args.detector_port, 'threaded': False}
     flask_wrapper.app.run(**params)

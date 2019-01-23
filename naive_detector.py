@@ -9,9 +9,8 @@ from caffe.proto import caffe_pb2
 from eyewitness.detection_utils import DetectionResult
 from eyewitness.image_id import ImageId
 from eyewitness.object_detector import ObjectDetector
-from eyewitness.image_utils import (ImageHandler, swap_channel_rgb_bgr)
+from eyewitness.image_utils import (ImageHandler, swap_channel_rgb_bgr, Image)
 from google.protobuf import text_format
-from PIL import Image
 
 
 class RefineDetDetectorWrapper(ObjectDetector):
@@ -35,6 +34,10 @@ class RefineDetDetectorWrapper(ObjectDetector):
         self.transformer = caffe.io.Transformer({'data': self.net.blobs['data'].data.shape})
         self.transformer.set_transpose('data', (2, 0, 1))
         self.transformer.set_mean('data', np.array([104, 117, 123]))  # mean pixel
+
+    @property
+    def valid_labels(self):
+        return set(str(i.display_name) for i in self.labelmap.item)
 
     def predict(self, image_array):
         transformed_image = self.transformer.preprocess('data', image_array)
@@ -65,22 +68,20 @@ class RefineDetDetectorWrapper(ObjectDetector):
             assert found
         return labelnames
 
-    def detect(self, image, image_id):
+    def detect(self, image_obj):
         """
         need to implement detection method which return DetectionResult obj
 
         Parameters
         ----------
-        image: PIL.Image
-            PIL.Image instance
-        image_id: Union[str, ImageId]
-            image_id
+        image_obj: eyewitness.image_utils.Image
+            eyewitness Image obj
 
         Returns
         -------
         DetectionResult
         """
-        image_array = swap_channel_rgb_bgr(np.array(image))
+        image_array = swap_channel_rgb_bgr(np.array(image_obj.pil_image_obj))
         results = self.predict(image_array)
 
         detected_objects = []
@@ -100,7 +101,7 @@ class RefineDetDetectorWrapper(ObjectDetector):
             detected_objects.append([x1, y1, x2, y2, label, score, ''])
 
         image_dict = {
-            'image_id': image_id,
+            'image_id': image_obj.image_id,
             'detected_objects': detected_objects,
         }
         detection_result = DetectionResult(image_dict)
@@ -116,7 +117,6 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--gpu_id', type=int, default=0)
-    parser.add_argument('--save_fig', action='store_true')
     args = parser.parse_args()
 
     # gpu preparation
@@ -133,8 +133,8 @@ if __name__ == '__main__':
 
     object_detector = RefineDetDetectorWrapper(params, threshold=0.6)
 
-    image = Image.open('examples/images/5566.jpg')
     image_id = ImageId(channel='demo', timestamp=arrow.now().timestamp, file_format='jpg')
-    detection_result = object_detector.detect(image, image_id)
-    ImageHandler.draw_bbox(image, detection_result.detected_objects)
-    ImageHandler.save(image, "detected_image/drawn_image.jpg")
+    image_obj = Image(image_id, raw_image_path=raw_image_path)
+    detection_result = object_detector.detect(image_obj)
+    ImageHandler.draw_bbox(image_obj.pli_image_obj, detection_result.detected_objects)
+    ImageHandler.save(image_obj.pli_image_obj, "detected_image/drawn_image.jpg")
