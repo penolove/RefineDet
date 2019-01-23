@@ -136,5 +136,5 @@ if __name__ == '__main__':
     image_id = ImageId(channel='demo', timestamp=arrow.now().timestamp, file_format='jpg')
     image_obj = Image(image_id, raw_image_path=raw_image_path)
     detection_result = object_detector.detect(image_obj)
-    ImageHandler.draw_bbox(image_obj.pli_image_obj, detection_result.detected_objects)
-    ImageHandler.save(image_obj.pli_image_obj, "detected_image/drawn_image.jpg")
+    ImageHandler.draw_bbox(image_obj.pil_image_obj, detection_result.detected_objects)
+    ImageHandler.save(image_obj.pil_image_obj, "detected_image/drawn_image.jpg")
