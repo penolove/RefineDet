@@ -1,10 +1,11 @@
 import argparse
 
+import caffe
 from eyewitness.dataset_util import BboxDataSet
 from eyewitness.evaluation import BboxMAPEvaluator
 
 from naive_detector import RefineDetDetectorWrapper
-from yolo import YOLO
+
 
 parser = argparse.ArgumentParser(argument_default=argparse.SUPPRESS)
 parser.add_argument('--gpu_id', type=int, default=0)
