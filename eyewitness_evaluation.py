@@ -30,5 +30,5 @@ if __name__ == '__main__':
     }
     object_detector = RefineDetDetectorWrapper(params, threshold=0.6)
     bbox_map_evaluator = BboxMAPEvaluator(test_set_only=False)
-    # which will lead to ~0.73
-    print(bbox_map_evaluator.evaluate(object_detector, dataset_VOC_2007))
+    # which will lead to ~0.76
+    print(bbox_map_evaluator.evaluate(object_detector, dataset_VOC_2007)['mAP'])
