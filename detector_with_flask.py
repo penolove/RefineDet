@@ -92,7 +92,7 @@ if __name__ == '__main__':
     flask_wrapper = BboxObjectDetectionFlaskWrapper(
         object_detector, bbox_sqlite_handler, result_handlers,
         database=database, drawn_image_dir=args.drawn_image_dir,
-        detection_threshold=detection_threshold, collect_feedback_period=172800)
+    )
 
     params = {'host': args.detector_host, 'port': args.detector_port, 'threaded': False}
     flask_wrapper.app.run(**params)
