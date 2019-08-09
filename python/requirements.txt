@@ -19,3 +19,4 @@ six>=1.1.0
 # eyewitness
 eyewitness==1.0.7
 opencv-python
+line-bot-sdk

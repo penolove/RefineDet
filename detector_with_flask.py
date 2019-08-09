@@ -5,9 +5,11 @@ import caffe
 from eyewitness.config import BBOX
 from eyewitness.flask_server import BboxObjectDetectionFlaskWrapper
 from eyewitness.result_handler.db_writer import BboxPeeweeDbWriter
-from eyewitness.result_handler.line_detection_result_handler import LineAnnotationSender
+
 from naive_detector import RefineDetDetectorWrapper
 from peewee import SqliteDatabase
+
+from line_detection_result_handler import LineAnnotationSender
 
 
 # class YOLO defines the default value, so suppress any default here
